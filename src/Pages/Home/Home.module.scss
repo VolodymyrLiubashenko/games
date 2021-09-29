@@ -1,0 +1,23 @@
+@import '../../null.scss';
+
+.container{
+  background: #411515; 
+  min-height:100vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.list{
+    font-weight: 600;
+    font-size: 30px;
+    margin:  auto;
+    text-transform: uppercase;
+  }
+.list_item{
+    margin: 20px 0;
+    }
+
+.link{
+   color: #ffffff;
+}

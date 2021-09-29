@@ -1,0 +1,23 @@
+.game_container{
+   min-height: 100vh;
+   background: #696966;
+}
+.game_title{
+   text-align: center;
+   min-height: 80px;
+   font-size: 50px;
+   color: #ffffff;
+}
+.checkers_field{
+   display: flex;
+   justify-content: center;
+   flex-wrap: wrap;
+   max-width: 480px;
+   margin: 0 auto;
+   // div:nth-child(odd){
+   //    background: #f3c278;
+   // }
+   // div:nth-child(even){
+   //    background: #140f06;
+   // }
+}

@@ -1,0 +1,23 @@
+.cell{
+   min-height: 60px;
+   min-width: 60px;
+   border:1px solid #000000;
+   flex: 0 0 100/8%;
+   position: relative;
+   // div{
+   //    position: absolute;
+   //    top:50%;
+   //    left:50%;
+   //    transform: translate(-50%,-50%);
+   // }
+}
+
+.cell[data-type = 'black']{
+   background:#140f06;
+   position: relative;
+}
+
+.cell[data-type = 'white']{
+   background:#f3c278;
+   position: relative;
+}
