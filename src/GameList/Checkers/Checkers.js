@@ -12,6 +12,7 @@ const Checkers = ()=>{
    let deletePosition = useRef()
    let field = useRef()
    let checkers = useRef()
+   let checkersPosition = { 2: '2', 4: '4', 6: '6', 8: '8', 9: '9', 11: '11', 13: '13', 15: '15', 18: '18', 20: '20', 22: '22', 24: '24', 41: '41', 43: '43', 45: '45', 47: '47', 50: '50', 52: '52', 54: '54', 56: '56', 57: '57', 59: '59', 61: '61', 63: '63' }
 
    useEffect(() => {
       checkers.current = field.current.querySelectorAll('div[data-type="checker"]')
@@ -21,55 +22,65 @@ const Checkers = ()=>{
       })
    }, [])
 
+   useEffect(()=>{
+      for (let el of field.current.children){
+         if(el.children.length!==0){
+            checkersPosition[el.firstElementChild.dataset.number]=el.dataset.number
+         }
+      }
+   },[])
+
    let getDifference = (a,b) => {
       let result = Math.abs(Number(a)-Number(b))
       return result
    }
 
-   let checkCheckerPresence = (deletePosition) =>{
+   let checkBeatPosibility = (currentChecker) =>{
+      let beatNumber
       let cellWithBeatedCheacer = Array.from(field.current.children).find(el => el.dataset.number === String(deletePosition))
-      if (cellWithBeatedCheacer){
-         return cellWithBeatedCheacer.children.length!=0 ? true: false
-      }
-      return false
+      if (cellWithBeatedCheacer && cellWithBeatedCheacer.firstElementChild){
+         beatNumber = Number(cellWithBeatedCheacer.firstElementChild.dataset.number)
+      }else return false
+      if ((Number(currentChecker) <= 24 && beatNumber > 40) || (Number(currentChecker) >= 40 && beatNumber <= 24)) return true
+       return false
    }
 
    function removechecker(e){
          let cellWithBeatedCheacer = Array.from(field.current.children).find(el => el.dataset.number === String(deletePosition))
-         cellWithBeatedCheacer ? cellWithBeatedCheacer.innerHTML = '' : cellWithBeatedCheacer=undefined
+      if (cellWithBeatedCheacer){
+            delete checkersPosition[cellWithBeatedCheacer.firstElementChild.dataset.number]
+            cellWithBeatedCheacer.innerHTML = ''
+      }
+        
    }
 
    function getChekerState(e){
       if (e.target.closest('div[data-type="checker"]')){
          currentChecker.current=(addConditionToChecker(getChecker(e)))
          currentParrent.current=(getParrentNode(addConditionToChecker(getChecker(e))))
-         startPosition = Number(currentParrent.current.dataset.number)
-         console.log('currentParrent.current', currentParrent.current)
-         
+         startPosition = Number(currentParrent.current.dataset.number)  
       }
    }
 
    function moveChecker(e){
       finishPosition = Number(e.target.dataset.number)
       deletePosition = (startPosition + finishPosition) / 2
-      console.log('deletePosition', deletePosition)
-      console.log('getDifference(startPosition, finishPosition)', getDifference(startPosition, finishPosition))
-      console.log('finishPosition', finishPosition)
-      console.log('startPosition', startPosition)
-      console.log('currentParrent.current', currentParrent.current)
       if (
          e.target.children.length === 0 &&
          e.target.dataset.type === 'black' &&
           currentParrent.current &&
-         checkCheckerPresence(deletePosition) &&
+         checkBeatPosibility(currentChecker.current.dataset.number) &&
          getDifference(startPosition, finishPosition) >= 14 &&
-         getDifference(startPosition, finishPosition) != 16 &&
+         getDifference(startPosition, finishPosition) !== 16 &&
          getDifference(startPosition,finishPosition) <= 18){
             currentParrent.current.removeChild(currentChecker.current)
             e.target.appendChild(currentChecker.current)
             removechecker(e)
             currentParrent.current = e.target
             startPosition = Number(currentParrent.current.dataset.number)
+            checkersPosition[currentChecker.current.dataset.number] = e.target.dataset.number
+            getQueenChecker()
+            console.log('checkersPosition', checkersPosition)
        }else if (
          e.target.children.length === 0 &&
          e.target.dataset.type === 'black' && 
@@ -79,7 +90,10 @@ const Checkers = ()=>{
             currentParrent.current.removeChild(currentChecker.current)
             currentParrent.current = e.target
             e.target.appendChild(currentChecker.current)
-            startPosition = Number(currentParrent.current.dataset.number)  
+            startPosition = Number(currentParrent.current.dataset.number)
+            checkersPosition[currentChecker.current.dataset.number] = e.target.dataset.number
+            getQueenChecker()
+            console.log('checkersPosition', checkersPosition)
       }
    }
    
@@ -100,35 +114,51 @@ const Checkers = ()=>{
       }   
    }
 
-   
-
-   let renderCell = () =>{
+   let renderCell = (obj) =>{
       let cells = []
       for(let i = 1, k=1; i <=64; i++){
          if ((i % 2 === 0 && k % 2 ===0 )|| (i % 2 !== 0 && k % 2 !==0)){
             cells.push(<Cell key = {i} number = {i}  type = 'white'/>)
             }
          if ((i % 2 === 0 && k % 2 !== 0) || (i % 2 !== 0 && k % 2 === 0)){
-            if(i<=24){
-               cells.push(<Cell key={i} children={<Checker number = {i} color="black"/>} number = {i} type='black' />)
+            let flag = 0
+             for(let key in obj){
+               let color=key>24?'white':'black'
+               if(Number(obj[key]) === i){
+                  cells.push(<Cell key={i} children={<Checker number={key} color={color} />} number = {i} type="black"/>)
+                  flag++
+               }  
             }
-             if(i>=41){
-                cells.push(<Cell key={i} children={<Checker number={i} color="white" />} number={i} type='black' />)
+            if(flag === 0){
+               cells.push(<Cell key={i} number={i} type='black' />)
             }
-             if(i>24 && i<41){
-                cells.push(<Cell key={i} number={i} type='black' />)
-            } 
          }  
          i%8 === 0? k++:k=k           
       }
+       console.log('cells', cells[1])
       return cells
+     
    }
+
+   let getQueenChecker = ()=>{
+      if (currentChecker.current.dataset.color === 'white'
+          && Number(currentParrent.current.dataset.number) >= 2 
+         && Number(currentParrent.current.dataset.number) <= 8){
+         currentChecker.current.dataset.queen = 'true'
+      }
+      if (currentChecker.current.dataset.color === 'black'
+         && Number(currentParrent.current.dataset.number) >= 51
+         && Number(currentParrent.current.dataset.number) <= 64) {
+         currentChecker.current.dataset.queen = 'true'
+      }
+   }
+   
    return (
       <div className = {style.game_container}>
          <Header/>
          <h1 className = {style.game_title}>Checkers</h1>
          <div ref = {field} className={style.checkers_field}>
-            {renderCell()}
+            {renderCell(checkersPosition)}
          </div>
       </div>
    )
